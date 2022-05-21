@@ -1,28 +1,44 @@
 from appJar import gui
+import os
+from dotenv import load_dotenv
 import requests
 
-app = gui("Email App")
+load_dotenv()
+
+app = gui("Email App", "1280x720")
+app.setBg("#107373")
+app.setFont(20)
 app.addLabel("title", "Hello")
 app.setLabelBg("title", "#0a284f")
-app.addLabelEntry("Email text")
+app.addLabelEntry("Name of the receiver")
+app.addLabelEntry("Email of the receiver")
+app.addLabelEntry("Title of message")
+app.addLabelEntry("Message")
+app.setFocus("Message")
 
 def press(button):
     if button == "Cancel":
         app.stop()
     else:
-        emailText = app.getEntry("Email text")
+        name = app.getEntry("Name of the receiver")
+        email = app.getEntry("Email of the receiver")
+        title = app.getEntry("Title of message")
+        emailText = app.getEntry("Message")
+        sendEmail(name, email, title, emailText)
+
 
 app.addButtons(["Submit", "Cancel"], press)
 
-def sendEmail():
+def sendEmail(receiverName, receiverEmail, title, text):
     response = requests.post(
-		"https://api.mailgun.net/v3/customer-service.sercbot.com/messages",
-		auth=("api", "7f4907c825d6e95145364d1298e031b3-100b5c8d-c8853f0e"),
-		data={"from": "SERC-BOT <password-reset@customer-service.sercbot.com>",
-		"to": "",
-		"subject": "password reset | SERC-BOT",
-		"text": "Here's your password reset code: "})
+		"https://api.mailgun.net/v3/sandbox17d13d9dd0d748a5b06e1727acc4213e.mailgun.org/messages",
+		auth=("api", os.getenv("MAILGUN_KEY")),
+		data={"from": "Mailgun Sandbox <postmaster@sandbox17d13d9dd0d748a5b06e1727acc4213e.mailgun.org>",
+			"to": receiverName + " <" + receiverEmail + ">",
+			"subject": "Hello Ernesto Lopez -2",
+			"html": '<h1 style="background-color: #ad213a; color: #ffff;">' + title + '</h1><p style="background-color: #0a284f; color: #fff">' + text + "</p>"})
     data = response.text
+    print(os.environ.get("MAILGUN_KEY"))
     print(data)
 
 
